@@ -1,3 +1,5 @@
+
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
@@ -24,7 +26,8 @@ class DioPackage extends StatefulWidget {
 }
 
 class _DioPackageState extends State<DioPackage> {
-  String title = '';
+  List products = [];
+  String errorMessage = '';
   final Dio dio = Dio();
   String url = 'https://api.escuelajs.co/api/v1/products';
 
@@ -32,11 +35,11 @@ class _DioPackageState extends State<DioPackage> {
     try {
       final response = await dio.get(url);
       setState(() {
-        title = response.data[2]['title'];
+        products = response.data;
       });
     } on DioException catch (e) {
       setState(() {
-        title = 'Error: $e';
+        log('Error: $e');
       });
     }
   }
@@ -53,9 +56,22 @@ class _DioPackageState extends State<DioPackage> {
       appBar: AppBar(
         title: Text("Get API using Dio Package"),
       ),
-      body: Center(
-        child: title.isEmpty ? const CircularProgressIndicator():Text(title,style: TextStyle(fontSize: 30),),
-      ),
+      body: products.isEmpty
+          ? Center(
+              child: const CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  child: ListTile(
+                    leading: Image.network(products[index]['images'][0],width: 60,height: 60,fit: BoxFit.cover,),
+                    title: Text(products[index+1]['title']),
+                    subtitle: Text('Prices:\$${products[index]['price']}'),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
